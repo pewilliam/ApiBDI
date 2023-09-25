@@ -21,7 +21,7 @@ namespace Aplicacao.Controllers
         [HttpGet]
         public JsonResult Get()
         {
-            string query = @"SELECT * FROM rentcar.modelo;";
+            string query = @"SELECT * FROM rentcar.modelo ORDER BY id;";
 
             List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
 
@@ -94,5 +94,82 @@ namespace Aplicacao.Controllers
             }
         }
 
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] Modelo modelo)
+        {
+            try
+            {
+                string query = $@"
+                    UPDATE rentcar.modelo
+                    SET
+                        ano = '{modelo.Ano}',
+                        motor = '{modelo.Motor}',
+                        tipocambio = {modelo.TipoCambio},
+                        idmarca = {modelo.IdMarca},
+                        idcategoria = {modelo.IdCategoria},
+                        valorhora = {modelo.ValorHora},
+                        idcarro = {modelo.IdCarro},
+                        combustivel = '{modelo.Combustivel}',
+                        capacidade = {modelo.Capacidade},
+                        portas = {modelo.Portas},
+                        placa = '{modelo.Placa}'
+                    WHERE id = {id};";
+
+                string sqlDataSource = _config.GetConnectionString("RentCarCon");
+                using (NpgsqlConnection connection = new NpgsqlConnection(sqlDataSource))
+                {
+                    connection.Open();
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(query, connection))
+                    {
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        if (rowsAffected > 0)
+                        {
+                            return Ok("Atualização realizada com sucesso.");
+                        }
+                        else
+                        {
+                            return NotFound("Registro não encontrado.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro interno do servidor: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            try
+            {
+                string query = $@"
+                    DELETE FROM rentcar.modelo
+                    WHERE id = {id};";
+
+                string sqlDataSource = _config.GetConnectionString("RentCarCon");
+                using (NpgsqlConnection connection = new NpgsqlConnection(sqlDataSource))
+                {
+                    connection.Open();
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(query, connection))
+                    {
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        if (rowsAffected > 0)
+                        {
+                            return Ok("Exclusão realizada com sucesso.");
+                        }
+                        else
+                        {
+                            return NotFound("Registro não encontrado.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro interno do servidor: {ex.Message}");
+            }
+        }
     }
 }
