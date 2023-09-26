@@ -2,7 +2,7 @@
 {
     public class Aluguel
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
         public int IdFuncionario { get; set; }
         public int IdCliente { get; set; }
         public int IdModelo { get; set; }
@@ -11,11 +11,11 @@
         public int PeriodoAluguel { get; set; }
         public double ValorAluguel { get; set; }
         public DateTime? DhRenovacao { get; set; }
-        public int? PeriodoRenovacao { get; set; }
+        public DateTime? PeriodoRenovacao { get; set; }
         public double ValorTotal { get; set; }
         public double? ValorRenovacao { get; set; }
 
-        public Aluguel(int id, int idFuncionario, int idCliente, int idModelo, int idFormaPagto, DateTime dhAluguel, int periodoAluguel, double valorAluguel, DateTime? dhRenovacao, int? periodoRenovacao, double valorTotal, double? valorRenovacao)
+        public Aluguel(int? id, int idFuncionario, int idCliente, int idModelo, int idFormaPagto, DateTime dhAluguel, int periodoAluguel, double valorAluguel, DateTime? dhRenovacao, DateTime? periodoRenovacao, double valorTotal, double? valorRenovacao)
         {
             Id = id;
             IdFuncionario = idFuncionario;
