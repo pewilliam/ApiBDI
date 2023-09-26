@@ -1,16 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Aplicacao.Models;
+using Microsoft.AspNetCore.Mvc;
 using Npgsql;
-using Aplicacao.Models;
 
 namespace Aplicacao.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ModeloController : Controller
+    public class ClienteController : Controller
     {
         private readonly IConfiguration _config;
 
-        public ModeloController(IConfiguration configuration)
+        public ClienteController(IConfiguration configuration)
         {
             _config = configuration;
         }
@@ -18,7 +18,7 @@ namespace Aplicacao.Controllers
         [HttpGet]
         public JsonResult Get()
         {
-            string query = @"SELECT * FROM rentcar.modelo ORDER BY id;";
+            string query = @"SELECT * FROM rentcar.cliente ORDER BY id;";
 
             List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
 
@@ -49,67 +49,57 @@ namespace Aplicacao.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] Modelo modelo)
-        {
-            if (modelo == null)
-            {
-                return BadRequest("Dados do modelo inválidos.");
-            }
-
-            string insertQuery = $@"
-                INSERT INTO rentcar.modelo (ano, motor, tipocambio, idmarca, idcategoria, valorhora, idcarro, combustivel, capacidade, portas, placa)
-                VALUES (
-                    '{modelo.Ano}',
-                    '{modelo.Motor}',
-                    {modelo.TipoCambio},
-                    {modelo.IdMarca},
-                    {modelo.IdCategoria},
-                    {modelo.ValorHora},
-                    {modelo.IdCarro},
-                    '{modelo.Combustivel}',
-                    {modelo.Capacidade},
-                    {modelo.Portas},
-                    '{modelo.Placa}'
-                );";
-
-            string sqlDataSource = _config.GetConnectionString("RentCarCon");
-            using (NpgsqlConnection connection = new NpgsqlConnection(sqlDataSource))
-            {
-                connection.Open();
-                using (NpgsqlCommand cmd = new NpgsqlCommand(insertQuery, connection))
-                {
-                    int rowsAffected = cmd.ExecuteNonQuery();
-                    if (rowsAffected > 0)
-                    {
-                        return Ok("Inserção bem-sucedida.");
-                    }
-                    else
-                    {
-                        return BadRequest("A inserção falhou.");
-                    }
-                }
-            }
-        }
-
-        [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Modelo modelo)
+        public IActionResult Post([FromBody] Cliente cliente)
         {
             try
             {
                 string query = $@"
-                    UPDATE rentcar.modelo
+                    INSERT INTO rentcar.cliente (iduser, nome, email, dtnascimento, cpf)
+                    VALUES (
+                        {cliente.IdUser},
+                        '{cliente.Nome}',
+                        '{cliente.Email}',
+                        '{cliente.DtNascimento:yyyy-MM-dd}',
+                        '{cliente.Cpf}'
+                    );";
+
+                string sqlDataSource = _config.GetConnectionString("RentCarCon");
+                using (NpgsqlConnection connection = new NpgsqlConnection(sqlDataSource))
+                {
+                    connection.Open();
+                    using (NpgsqlCommand cmd = new NpgsqlCommand(query, connection))
+                    {
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        if (rowsAffected > 0)
+                        {
+                            return Ok("Inserção realizada com sucesso.");
+                        }
+                        else
+                        {
+                            return BadRequest("A inserção falhou.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro interno do servidor: {ex.Message}");
+            }
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Put(int id, [FromBody] Cliente cliente)
+        {
+            try
+            {
+                string query = $@"
+                    UPDATE rentcar.cliente
                     SET
-                        ano = '{modelo.Ano}',
-                        motor = '{modelo.Motor}',
-                        tipocambio = {modelo.TipoCambio},
-                        idmarca = {modelo.IdMarca},
-                        idcategoria = {modelo.IdCategoria},
-                        valorhora = {modelo.ValorHora},
-                        idcarro = {modelo.IdCarro},
-                        combustivel = '{modelo.Combustivel}',
-                        capacidade = {modelo.Capacidade},
-                        portas = {modelo.Portas},
-                        placa = '{modelo.Placa}'
+                        iduser = {cliente.IdUser},
+                        nome = '{cliente.Nome}',
+                        email = '{cliente.Email}',
+                        dtnascimento = '{cliente.DtNascimento:yyyy-MM-dd}',
+                        cpf = '{cliente.Cpf}'
                     WHERE id = {id};";
 
                 string sqlDataSource = _config.GetConnectionString("RentCarCon");
@@ -142,7 +132,7 @@ namespace Aplicacao.Controllers
             try
             {
                 string query = $@"
-                    DELETE FROM rentcar.modelo
+                    DELETE FROM rentcar.cliente
                     WHERE id = {id};";
 
                 string sqlDataSource = _config.GetConnectionString("RentCarCon");
@@ -170,3 +160,4 @@ namespace Aplicacao.Controllers
         }
     }
 }
+
